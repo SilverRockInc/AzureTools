@@ -1,0 +1,16 @@
+version: 0.0.{build}
+configuration: Release
+assembly_info:
+  patch: true
+  assembly_version: $(appveyor_build_version)
+  assembly_file_version: $(appveyor_build_version)
+before_build:
+  - nuget restore
+build:
+  publish_nuget: true
+  verbosity: minimal
+before_package:
+- ps: >-
+    (Get-Content "$env:APPVEYOR_BUILD_FOLDER\src\SilverRock.AzureTools\SilverRock.AzureTools.nuspec") `
+        -replace '<version>[^<]*?</version>', ('<version>{0}</version>' -f $env:APPVEYOR_BUILD_VERSION) |
+      Out-File "$env:APPVEYOR_BUILD_FOLDER\src\SilverRock.AzureTools\SilverRock.AzureTools.nuspec"
