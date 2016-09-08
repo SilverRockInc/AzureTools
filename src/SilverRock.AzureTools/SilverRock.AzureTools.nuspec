@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Konves.AzureTools</id>
-    <title>Konves.AzureTools</title>
+    <id>SilverRock.AzureTools</id>
+    <title>SilverRock.AzureTools</title>
     <version>$version$</version>
-    <authors>skonves</authors>
-    <owners>skonves</owners>
+    <authors>silverrock</authors>
+    <owners>silverrock</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-    <projectUrl>https://github.com/skonves/Konves.AzureTools</projectUrl>
+    <projectUrl>https://github.com/SilverRockInc/AzureTools</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Do the Azure things.</description>
     <releaseNotes>Initial release.</releaseNotes>
