@@ -1,3 +1,6 @@
+environment:
+  COVERALLS_REPO_TOKEN:
+    secure: tEJ3Pi//WIBJgjtg3dFXClJxZ0kX9Aak/B3XRMal/uCTfjb0ayWf2rwbrB4jpUUu
 version: 0.0.{build}
 configuration: Release
 assembly_info:
@@ -9,6 +12,8 @@ before_build:
 build:
   publish_nuget: true
   verbosity: minimal
+after_test:
+- cmd: .\coverage.cmd
 before_package:
 - ps: >-
     (Get-Content "$env:APPVEYOR_BUILD_FOLDER\src\SilverRock.AzureTools\SilverRock.AzureTools.nuspec") `
