@@ -9,7 +9,7 @@
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/SilverRockInc/AzureTools</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>Do the Azure things.</description>
+    <description>Tools for scripted configuration of Azure entities</description>
     <releaseNotes>Initial release.</releaseNotes>
     <copyright>Copyright 2016 $author$</copyright>
     <tags></tags>
