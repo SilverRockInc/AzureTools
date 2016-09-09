@@ -10,8 +10,8 @@
     <projectUrl>https://github.com/SilverRockInc/AzureTools</projectUrl>
     <iconUrl>https://secure.gravatar.com/avatar/8f06f043335031d7a8f997aee366ba23?size=64</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>Tools for scripted configuration of Azure entities</description>
-    <releaseNotes>Initial release.</releaseNotes>
+    <description>Tools for configuring and consuming Azure entities</description>
+    <releaseNotes>Added polling code.</releaseNotes>
     <copyright>Copyright 2016 $author$</copyright>
     <tags></tags>
   </metadata>

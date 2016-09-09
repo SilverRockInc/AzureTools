@@ -3,4 +3,4 @@
 [![Nuget package](https://img.shields.io/nuget/v/SilverRock.AzureTools.svg?maxAge=300)](https://www.nuget.org/packages/SilverRock.AzureTools/)
 
 # AzureTools
-Tools for scripted configuration of Azure entities.
+Tools for configuring and consuming Azure entities.
