@@ -50,7 +50,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppServiceAccount.cs" />
+    <Compile Include="AppServiceClient.cs" />
+    <Compile Include="AzureAppServiceAccount.cs" />
     <Compile Include="BrokeredMessageEventArgs.cs" />
+    <Compile Include="IAppServiceClient.cs" />
     <Compile Include="INamespaceService.cs" />
     <Compile Include="Mappers\SubscriberMapper.cs" />
     <Compile Include="Mappers\TopicMapper.cs" />

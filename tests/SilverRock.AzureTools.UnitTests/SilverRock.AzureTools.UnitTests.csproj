@@ -69,6 +69,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AppServiceClientTestFixture.cs" />
+    <Compile Include="AzureAppServiceAccountTestFixture.cs" />
     <Compile Include="ScriptRunnerTestFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -79,7 +81,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
