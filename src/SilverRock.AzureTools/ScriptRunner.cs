@@ -2,6 +2,8 @@
 using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json;
 using SilverRock.AzureTools.Models;
+using SilverRock.AzureTools.Models.AppService;
+using SilverRock.AzureTools.Models.ServiceBus;
 using SilverRock.AzureTools.Services;
 using System;
 using System.Linq;
@@ -25,48 +27,172 @@ namespace SilverRock.AzureTools
 			_namespaceService = namespaceService;
 		}
 
-		public void Create(string script, bool force = false)
+		public void Run(Script script, bool force = false)
 		{
-			Script s = ParseScript(script);
-
-			OnMessage($"Creating {s.Topics.Count} topics ... " + Environment.NewLine + Environment.NewLine);
-
-			foreach (Topic topic in s.Topics ?? Enumerable.Empty<Topic>())
+			if (script.DeployEnvironments != null)
 			{
-				if (_namespaceService.TopicExists(topic.Path))
+				foreach (DeployEnvironment env in script.DeployEnvironments)
 				{
-					if (force)
-					{
-						OnMessage($"Topic '{topic.Path}' already exists.  Deleting ... ");
-						_namespaceService.DeleteTopic(topic.Path);
-						OnMessage("done" + Environment.NewLine);
-					}
-					else
-					{
-						OnMessage($"Topic '{topic.Path}' already exists.  Skipping ... " + Environment.NewLine);
-						continue;
-					}
-				}
+					OnMessage($"Configuring deployment environment '{env.Name}' ... " + Environment.NewLine + Environment.NewLine);
 
-				TopicDescription topicDescription = Mappers.TopicMapper.Map(topic);
+					if (env.AppServices != null)
+						Run(env.AppServices, force);
 
-				OnMessage($"Creating topic '{topic.Path}' ... ");
-				_namespaceService.CreateTopic(topicDescription);
-				OnMessage("done" + Environment.NewLine);
-
-				foreach (Subscription subscription in topic.Subscriptions ?? Enumerable.Empty<Subscription>())
-				{
-					SubscriptionDescription subscriptionDescription = Mappers.SubscriberMapper.Map(subscription, topic.Path);
-
-					OnMessage($"Creating subscription '{subscription.Name}' for topic '{topic.Path}' ... ");
-					if (subscription.SqlFilter == null)
-						_namespaceService.CreateSubscription(subscriptionDescription);
-					else
-						_namespaceService.CreateSubscription(subscriptionDescription, new SqlFilter(subscription.SqlFilter));
-					OnMessage("done" + Environment.NewLine);
+					if (env.Topics != null)
+						Run(env.Topics, force);
 				}
 			}
 		}
+
+		internal void Run(AppServices appServices, bool force = false)
+		{
+			if (appServices.Create != null)
+			{
+				OnMessage($"Creating {appServices.Create.Count} App Services ... " + Environment.NewLine + Environment.NewLine);
+
+				foreach (AppService appService in appServices.Create ?? Enumerable.Empty<AppService>())
+				{
+					CreateAppService(appService);
+				}
+			}
+
+			if (appServices.Update != null)
+			{
+				OnMessage($"Updating {appServices.Update.Count} App Services ... " + Environment.NewLine + Environment.NewLine);
+
+				foreach (AppService appService in appServices.Update ?? Enumerable.Empty<AppService>())
+				{
+					UpdateAppService(appService);
+				}
+			}
+
+			if (appServices.Remove != null)
+			{
+				OnMessage($"Removing {appServices.Remove.Count} App Services ... " + Environment.NewLine + Environment.NewLine);
+
+				foreach (AppService appService in appServices.Remove ?? Enumerable.Empty<AppService>())
+				{
+					RemoveAppService(appService);
+				}
+			}
+		}
+
+		internal void Run(Topics topics, bool force = false)
+		{
+			if (topics.Create != null)
+			{
+				OnMessage($"Creating {topics.Create.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+
+				foreach (Topic topic in topics.Create ?? Enumerable.Empty<Topic>())
+				{
+					CreateTopic(topic);
+				}
+			}
+
+			if (topics.Update != null)
+			{
+				OnMessage($"Updating {topics.Update.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+
+				foreach (Topic topic in topics.Update ?? Enumerable.Empty<Topic>())
+				{
+					UpdateTopic(topic);
+				}
+			}
+
+			if (topics.Remove != null)
+			{
+				OnMessage($"Removing {topics.Remove.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+
+				foreach (Topic topic in topics.Remove ?? Enumerable.Empty<Topic>())
+				{
+					RemoveTopic(topic);
+				}
+			}
+		}
+
+		internal void CreateTopic(Topic topic, bool force = false)
+		{
+			INamespaceService ns = new AzureNamespaceService(NamespaceManager.CreateFromConnectionString(CreateConnectionString(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey)));
+
+			if (ns.TopicExists(topic.Path))
+			{
+				if (force)
+				{
+					OnMessage($"Topic '{topic.Path}' already exists.  Deleting ... ");
+					ns.DeleteTopic(topic.Path);
+					OnMessage("done" + Environment.NewLine);
+				}
+				else
+				{
+					OnMessage($"Topic '{topic.Path}' already exists.  Skipping ... " + Environment.NewLine);
+					return;
+				}
+			}
+
+			TopicDescription topicDescription = Mappers.TopicMapper.Map(topic);
+
+			OnMessage($"Creating topic '{topic.Path}' ... ");
+			ns.CreateTopic(topicDescription);
+			OnMessage("done" + Environment.NewLine);
+
+			foreach (Subscription subscription in topic.Subscriptions ?? Enumerable.Empty<Subscription>())
+			{
+				SubscriptionDescription subscriptionDescription = Mappers.SubscriberMapper.Map(subscription, topic.Path);
+
+				OnMessage($"Creating subscription '{subscription.Name}' for topic '{topic.Path}' ... ");
+				if (subscription.SqlFilter == null)
+					ns.CreateSubscription(subscriptionDescription);
+				else
+					ns.CreateSubscription(subscriptionDescription, new SqlFilter(subscription.SqlFilter));
+				OnMessage("done" + Environment.NewLine);
+			}
+		}
+
+		internal void UpdateTopic(Topic topic, bool force = false)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal void RemoveTopic(Topic topic)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal void CreateAppService(AppService appService, bool force = false)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal void UpdateAppService(AppService appService, bool force = false)
+		{
+			OnMessage($"Confinuring {appService.Settings.Count} settings for {appService.Accounts.Count} App Service Deployment Accounts ... " + Environment.NewLine + Environment.NewLine);
+
+			foreach (Account account in appService.Accounts)
+			{
+				OnMessage($"Confinuring settings for '{account.ServiceName}' ... " );
+				AppServiceAccount azureAccount = new AzureAppServiceAccount(account.ServiceName, account.Username, account.Password);
+				AppServiceClient client = new AppServiceClient(azureAccount);
+				client.SetSettings(appService.Settings);
+				OnMessage("done" + Environment.NewLine);
+			}
+		}
+
+		internal void RemoveAppService(AppService appService, bool force = false)
+		{
+			throw new NotImplementedException();
+		}
+
+		//public void Create(string script, bool force = false)
+		//{
+		//	Script s = ParseScript(script);
+
+		//	OnMessage($"Creating {s.Topics.Create.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+
+		//	foreach (Topic topic in s.Topics.Create ?? Enumerable.Empty<Topic>())
+		//	{
+		//		CreateTopic(topic);
+		//	}
+		//}
 
 		public Script ParseScript(string script)
 		{

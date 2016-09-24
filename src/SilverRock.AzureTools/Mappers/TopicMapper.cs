@@ -2,6 +2,7 @@
 using Microsoft.ServiceBus.Messaging;
 using System;
 using System.Linq;
+using SilverRock.AzureTools.Models.ServiceBus;
 
 namespace SilverRock.AzureTools.Mappers
 {

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using SilverRock.AzureTools.Models.ServicesBus;
+using System;
 using System.Collections.Generic;
 
-namespace SilverRock.AzureTools.Models
+namespace SilverRock.AzureTools.Models.ServiceBus
 {
 	public class Topic
 	{
+		public Namespace Namespace { get; set; }
+
 		public string Path { get; set; }
 		public List<SharedAccessPolicy> Authorization { get; set; }
 		public TimeSpan? AutoDeleteOnIdle { get; set; }
@@ -37,5 +40,4 @@ namespace SilverRock.AzureTools.Models
 		Listen,
 		ManageNotificationHub
 	}
-
 }
