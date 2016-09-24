@@ -1,10 +1,8 @@
-﻿using Microsoft.ServiceBus;
-using Microsoft.ServiceBus.Messaging;
+﻿using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json;
 using SilverRock.AzureTools.Models;
 using SilverRock.AzureTools.Models.AppService;
 using SilverRock.AzureTools.Models.ServiceBus;
-using SilverRock.AzureTools.Services;
 using System;
 using System.Linq;
 
@@ -73,7 +71,7 @@ namespace SilverRock.AzureTools
 		{
 			if (topics.Create != null)
 			{
-				OnMessage($"Creating {topics.Create.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+				OnMessage($"Creating {topics.Create.Count} topics ... " + Environment.NewLine + Environment.NewLine);
 
 				foreach (Topic topic in topics.Create ?? Enumerable.Empty<Topic>())
 				{
@@ -83,7 +81,7 @@ namespace SilverRock.AzureTools
 
 			if (topics.Update != null)
 			{
-				OnMessage($"Updating {topics.Update.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+				OnMessage($"Updating {topics.Update.Count} topics ... " + Environment.NewLine + Environment.NewLine);
 
 				foreach (Topic topic in topics.Update ?? Enumerable.Empty<Topic>())
 				{
@@ -93,7 +91,7 @@ namespace SilverRock.AzureTools
 
 			if (topics.Remove != null)
 			{
-				OnMessage($"Removing {topics.Remove.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
+				OnMessage($"Removing {topics.Remove.Count} topics ... " + Environment.NewLine + Environment.NewLine);
 
 				foreach (Topic topic in topics.Remove ?? Enumerable.Empty<Topic>())
 				{
@@ -102,7 +100,7 @@ namespace SilverRock.AzureTools
 			}
 		}
 
-		internal void CreateTopic(Topic topic, bool force = false)
+		public void CreateTopic(Topic topic, bool force = false)
 		{
 			INamespaceService ns = _serviceLocator.GetNamespaceService(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey); // new AzureNamespaceService(NamespaceManager.CreateFromConnectionString(CreateConnectionString(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey)));
 
@@ -140,22 +138,22 @@ namespace SilverRock.AzureTools
 			}
 		}
 
-		internal void UpdateTopic(Topic topic, bool force = false)
+		public void UpdateTopic(Topic topic, bool force = false)
 		{
 			throw new NotImplementedException();
 		}
 
-		internal void RemoveTopic(Topic topic)
+		public void RemoveTopic(Topic topic)
 		{
 			throw new NotImplementedException();
 		}
 
-		internal void CreateAppService(AppService appService, bool force = false)
+		public void CreateAppService(AppService appService, bool force = false)
 		{
 			throw new NotImplementedException();
 		}
 
-		internal void UpdateAppService(AppService appService, bool force = false)
+		public void UpdateAppService(AppService appService, bool force = false)
 		{
 			OnMessage($"Confinuring {appService.Settings.Count} settings for {appService.Accounts.Count} App Service Deployment Accounts ... " + Environment.NewLine + Environment.NewLine);
 
@@ -169,22 +167,10 @@ namespace SilverRock.AzureTools
 			}
 		}
 
-		internal void RemoveAppService(AppService appService, bool force = false)
+		public void RemoveAppService(AppService appService, bool force = false)
 		{
 			throw new NotImplementedException();
 		}
-
-		//public void Create(string script, bool force = false)
-		//{
-		//	Script s = ParseScript(script);
-
-		//	OnMessage($"Creating {s.Topics.Create.Count} topics ... " + System.Environment.NewLine + System.Environment.NewLine);
-
-		//	foreach (Topic topic in s.Topics.Create ?? Enumerable.Empty<Topic>())
-		//	{
-		//		CreateTopic(topic);
-		//	}
-		//}
 
 		public Script ParseScript(string script)
 		{
