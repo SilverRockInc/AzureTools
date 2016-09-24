@@ -16,6 +16,7 @@ after_test:
 - cmd: .\coverage.cmd
 before_package:
 - ps: >-
+    $version = If ( $env:APPVEYOR_BUILD_VERSION == "master" ) {"$env:APPVEYOR_BUILD_VERSION"} Else {"$env:APPVEYOR_BUILD_VERSION-alpha"}
     (Get-Content "$env:APPVEYOR_BUILD_FOLDER\src\SilverRock.AzureTools\SilverRock.AzureTools.nuspec") `
         -replace '<version>[^<]*?</version>', ('<version>{0}</version>' -f $env:APPVEYOR_BUILD_VERSION) |
       Out-File "$env:APPVEYOR_BUILD_FOLDER\src\SilverRock.AzureTools\SilverRock.AzureTools.nuspec"
