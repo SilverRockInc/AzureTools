@@ -5,7 +5,7 @@ namespace SilverRock.AzureTools
 	/// <summary>
 	/// Mockable facade for Microsoft.ServiceBus.NamespaceManager
 	/// </summary>
-	internal interface INamespaceService
+	public interface INamespaceService
 	{
 		bool TopicExists(string path);
 		void DeleteTopic(string path);

@@ -12,19 +12,11 @@ namespace SilverRock.AzureTools
 {
 	public class ScriptRunner
 	{
-		public ScriptRunner(NamespaceManager namespaceManager)
-		{
-			_namespaceService = new AzureNamespaceService(namespaceManager);
-		}
+		public ScriptRunner() : this(new DefaultServiceLocator()) { }
 
-		public ScriptRunner(string endpoint, string accessKeyName, string accessKey)
+		public ScriptRunner(IServiceLocator serviceLocator)
 		{
-			_namespaceService = new AzureNamespaceService(NamespaceManager.CreateFromConnectionString(CreateConnectionString(endpoint, accessKeyName, accessKey)));
-		}
-
-		internal ScriptRunner(INamespaceService namespaceService)
-		{
-			_namespaceService = namespaceService;
+			_serviceLocator = serviceLocator;
 		}
 
 		public void Run(Script script, bool force = false)
@@ -52,7 +44,7 @@ namespace SilverRock.AzureTools
 
 				foreach (AppService appService in appServices.Create ?? Enumerable.Empty<AppService>())
 				{
-					CreateAppService(appService);
+					CreateAppService(appService, force);
 				}
 			}
 
@@ -62,7 +54,7 @@ namespace SilverRock.AzureTools
 
 				foreach (AppService appService in appServices.Update ?? Enumerable.Empty<AppService>())
 				{
-					UpdateAppService(appService);
+					UpdateAppService(appService, force);
 				}
 			}
 
@@ -85,7 +77,7 @@ namespace SilverRock.AzureTools
 
 				foreach (Topic topic in topics.Create ?? Enumerable.Empty<Topic>())
 				{
-					CreateTopic(topic);
+					CreateTopic(topic, force);
 				}
 			}
 
@@ -95,7 +87,7 @@ namespace SilverRock.AzureTools
 
 				foreach (Topic topic in topics.Update ?? Enumerable.Empty<Topic>())
 				{
-					UpdateTopic(topic);
+					UpdateTopic(topic, force);
 				}
 			}
 
@@ -112,7 +104,7 @@ namespace SilverRock.AzureTools
 
 		internal void CreateTopic(Topic topic, bool force = false)
 		{
-			INamespaceService ns = new AzureNamespaceService(NamespaceManager.CreateFromConnectionString(CreateConnectionString(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey)));
+			INamespaceService ns = _serviceLocator.GetNamespaceService(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey); // new AzureNamespaceService(NamespaceManager.CreateFromConnectionString(CreateConnectionString(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey)));
 
 			if (ns.TopicExists(topic.Path))
 			{
@@ -170,7 +162,7 @@ namespace SilverRock.AzureTools
 			foreach (Account account in appService.Accounts)
 			{
 				OnMessage($"Confinuring settings for '{account.ServiceName}' ... " );
-				AppServiceAccount azureAccount = new AzureAppServiceAccount(account.ServiceName, account.Username, account.Password);
+				AppServiceAccount azureAccount = _serviceLocator.GetAppServiceAccount(account.ServiceName, account.Username, account.Password);
 				AppServiceClient client = new AppServiceClient(azureAccount);
 				client.SetSettings(appService.Settings);
 				OnMessage("done" + Environment.NewLine);
@@ -199,11 +191,6 @@ namespace SilverRock.AzureTools
 			return JsonConvert.DeserializeObject<Script>(script);
 		}
 
-		internal static string CreateConnectionString(string endpoint, string accessKeyName, string accessKey)
-		{
-			return $"Endpoint={endpoint};SharedAccessKeyName={accessKeyName};SharedAccessKey={accessKey}";
-		}
-
 		public event EventHandler<MessageEventArgs> Message;
 
 		protected virtual void OnMessage(string message)
@@ -211,7 +198,7 @@ namespace SilverRock.AzureTools
 			Message?.Invoke(this, new MessageEventArgs(message));
 		}
 
-		readonly INamespaceService _namespaceService;
+		readonly IServiceLocator _serviceLocator;
 	}
 
 	public class MessageEventArgs : EventArgs

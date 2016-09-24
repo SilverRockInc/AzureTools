@@ -2,6 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SilverRock.AzureTools.Models;
+using SilverRock.AzureTools.Models.ServiceBus;
+using SilverRock.AzureTools.Models.ServicesBus;
+using System.Collections.Generic;
 
 namespace SilverRock.AzureTools.UnitTests
 {
@@ -60,64 +63,58 @@ namespace SilverRock.AzureTools.UnitTests
 		private void DoTest(bool topicExists, bool createIsForced, Times deleteTopicCalled, Times createTopicCalled, Times createSubCalled)
 		{
 			// Arrange
-			var stub = new Mock<INamespaceService>();
 
-			stub.Setup(ns => ns.TopicExists(It.IsAny<string>())).Returns(topicExists);
+			var namespaceService = new Mock<INamespaceService>();
+			namespaceService
+				.Setup(ns => ns.TopicExists(It.IsAny<string>()))
+				.Returns(topicExists);
 
-			string script = $@"
-{{
-	topics: [
-		{{
-			path: 'some-topic',
-			subscriptions: [
-				{{ name: 'some-subscription' }},
-				{{ name: 'another-subscription' }}
-			]
-		}}
-	]
-}}";
+			var serviceLocator = new Mock<IServiceLocator>();
+			serviceLocator
+				.Setup(s => s.GetNamespaceService(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+				.Returns(namespaceService.Object);
 
-			ScriptRunner sut = new ScriptRunner(stub.Object);
+			Script script = new Script
+			{
+				DeployEnvironments = new List<DeployEnvironment>
+				{
+					new DeployEnvironment
+					{
+						Name = "test",
+						Topics = new Topics
+						{
+							Create = new List<Topic>
+							{
+								new Topic
+								{
+									Namespace = new Namespace
+									{
+										Endpoint = "asdf",
+										AccessKey = "asdf",
+										AccessKeyName = "asdf"
+									},
+									Path = "some-topic",
+									Subscriptions = new List<Subscription>
+									{
+										new Subscription { Name = "some-subscription" },
+										new Subscription { Name = "another-subscription" }
+									}
+								}
+							}
+						}
+					}
+				}
+			};
 
-			// Act
-			sut.Create(script, force: createIsForced);
-
-			// Assert
-			stub.Verify(ns => ns.DeleteTopic(It.IsAny<string>()), deleteTopicCalled);
-			stub.Verify(ns => ns.CreateTopic(It.IsAny<TopicDescription>()), createTopicCalled);
-			stub.Verify(ns => ns.CreateSubscription(It.IsAny<SubscriptionDescription>()), createSubCalled);
-		}
-
-		[TestCategory(nameof(ScriptRunner))]
-		[TestMethod]
-		public void ParseScriptTest()
-		{
-			// Arrange
-			string path = "my-topic";
-
-			string script = $@"
-{{
-	topics: [
-		{{
-			path: '{path}',
-			authorization: [
-				{{ name: 'default', accessRights: ['Manage', 'Send', 'Listen'] }}
-			],
-			subscriptions: [
-				{{ name: 'some-subscription' }},
-				{{ name: 'another-subscription' }}
-			]
-		}}
-	]
-}}";
-
-			ScriptRunner sut = new ScriptRunner(default(INamespaceService));
+			ScriptRunner sut = new ScriptRunner(serviceLocator.Object);
 
 			// Act
-			Script result = sut.ParseScript(script);
+			sut.Run(script, force: createIsForced);
 
 			// Assert
-			Assert.IsNotNull(result);
+			namespaceService.Verify(ns => ns.DeleteTopic(It.IsAny<string>()), deleteTopicCalled);
+			namespaceService.Verify(ns => ns.CreateTopic(It.IsAny<TopicDescription>()), createTopicCalled);
+			namespaceService.Verify(ns => ns.CreateSubscription(It.IsAny<SubscriptionDescription>()), createSubCalled);
 		}
 	}
 }
