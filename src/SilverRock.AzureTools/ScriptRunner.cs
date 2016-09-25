@@ -102,6 +102,24 @@ namespace SilverRock.AzureTools
 
 		public void CreateTopic(Topic topic, bool force = false)
 		{
+			if (topic == null)
+				throw new ArgumentNullException(nameof(topic), $"{nameof(topic)} is null");
+
+			if (topic.Path == null)
+				throw new ArgumentException($"{nameof(topic)} does not specify a {nameof(topic.Path)}", nameof(topic));
+
+			if (topic.Namespace == null)
+				throw new ArgumentException($"{nameof(topic)} '{topic.Path}' does not specify a {nameof(topic.Namespace)}", nameof(topic));
+
+			if (topic.Namespace.Endpoint == null)
+				throw new ArgumentException($"{nameof(topic)} '{topic.Path}' does not specify a {nameof(topic.Namespace)} {nameof(topic.Namespace.Endpoint)}", nameof(topic));
+
+			if (topic.Namespace.AccessKeyName == null)
+				throw new ArgumentException($"{nameof(topic)} '{topic.Path}' does not specify a {nameof(topic.Namespace)} {nameof(topic.Namespace.AccessKeyName)}", nameof(topic));
+
+			if (topic.Namespace.AccessKey == null)
+				throw new ArgumentException($"{nameof(topic)} '{topic.Path}' does not specify a {nameof(topic.Namespace)} {nameof(topic.Namespace.AccessKey)}", nameof(topic));
+
 			INamespaceService ns = _serviceLocator.GetNamespaceService(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey); // new AzureNamespaceService(NamespaceManager.CreateFromConnectionString(CreateConnectionString(topic.Namespace.Endpoint, topic.Namespace.AccessKeyName, topic.Namespace.AccessKey)));
 
 			if (ns.TopicExists(topic.Path))
@@ -155,14 +173,35 @@ namespace SilverRock.AzureTools
 
 		public void UpdateAppService(AppService appService, bool force = false)
 		{
-			OnMessage($"Confinuring {appService.Settings.Count} settings for {appService.Accounts.Count} App Service Deployment Accounts ... " + Environment.NewLine + Environment.NewLine);
+			if (appService == null)
+				throw new ArgumentNullException(nameof(appService), $"{nameof(appService)} is null");
+
+			if (appService.Accounts == null || !appService.Accounts.Any())
+				throw new ArgumentException($"{nameof(appService)} does not specify any {nameof(appService.Accounts)}", nameof(appService));
 
 			foreach (Account account in appService.Accounts)
 			{
-				OnMessage($"Confinuring settings for '{account.ServiceName}' ... " );
+				if (string.IsNullOrWhiteSpace(account.ServiceName))
+					throw new ArgumentException($"{nameof(appService)} specifies an {nameof(Account)} without a {account.ServiceName}.");
+
+				if (string.IsNullOrWhiteSpace(account.Username))
+					throw new ArgumentException($"{nameof(appService)} specifies an {nameof(Account)} for '{account.ServiceName}' without a {account.Username}.");
+
+				if (string.IsNullOrWhiteSpace(account.Password))
+					throw new ArgumentException($"{nameof(appService)} specifies an {nameof(Account)} for '{account.ServiceName}' without a {account.Password}.");
+			}
+
+			OnMessage($"Configuring {appService.Settings?.Count ?? 0} settings for {appService.Accounts.Count} App Service Deployment Accounts ... " + Environment.NewLine + Environment.NewLine);
+
+			foreach (Account account in appService.Accounts)
+			{
+				OnMessage($"Configuring settings for '{account.ServiceName}' ... ");
 				AppServiceAccount azureAccount = _serviceLocator.GetAppServiceAccount(account.ServiceName, account.Username, account.Password);
 				AppServiceClient client = new AppServiceClient(azureAccount);
-				client.SetSettings(appService.Settings);
+
+				if (appService.Settings != null && appService.Settings.Any())
+					client.SetSettings(appService.Settings);
+
 				OnMessage("done" + Environment.NewLine);
 			}
 		}

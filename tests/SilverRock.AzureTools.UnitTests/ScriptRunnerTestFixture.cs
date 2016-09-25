@@ -2,8 +2,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SilverRock.AzureTools.Models;
+using SilverRock.AzureTools.Models.AppService;
 using SilverRock.AzureTools.Models.ServiceBus;
 using SilverRock.AzureTools.Models.ServicesBus;
+using System;
 using System.Collections.Generic;
 
 namespace SilverRock.AzureTools.UnitTests
@@ -58,6 +60,96 @@ namespace SilverRock.AzureTools.UnitTests
 				deleteTopicCalled: Times.Never(),
 				createTopicCalled: Times.Once(),
 				createSubCalled: Times.Exactly(2));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void UpdateAppServiceWhenAppServicesIsNull()
+		{
+			// Arrange
+			ScriptRunner sut = new ScriptRunner(new Mock<IServiceLocator>().Object);
+			AppService appService = null;
+
+			// Act
+			sut.UpdateAppService(appService);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void UpdateAppServiceWhenAccountsIsNull()
+		{
+			// Arrange
+			ScriptRunner sut = new ScriptRunner(new Mock<IServiceLocator>().Object);
+			AppService appService = new AppService();
+
+			// Act
+			sut.UpdateAppService(appService);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void UpdateAppServiceWhenAccountsIsEmpty()
+		{
+			// Arrange
+			ScriptRunner sut = new ScriptRunner(new Mock<IServiceLocator>().Object);
+			AppService appService = new AppService { Accounts = new List<Account>() };
+
+			// Act
+			sut.UpdateAppService(appService);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void UpdateAppServiceWhenServiceNameIsEmpty()
+		{
+			// Arrange
+			ScriptRunner sut = new ScriptRunner(new Mock<IServiceLocator>().Object);
+			AppService appService = new AppService
+			{
+				Accounts = new List<Account>
+				{
+					new Account { Username = "asdf" , Password = "asdf" }
+				}
+			};
+
+			// Act
+			sut.UpdateAppService(appService);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void UpdateAppServiceWhenUsernameIsEmpty()
+		{
+			// Arrange
+			ScriptRunner sut = new ScriptRunner(new Mock<IServiceLocator>().Object);
+			AppService appService = new AppService
+			{
+				Accounts = new List<Account>
+				{
+					new Account { ServiceName = "asdf" , Password = "asdf" }
+				}
+			};
+
+			// Act
+			sut.UpdateAppService(appService);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void UpdateAppServiceWhenPasswordIsEmpty()
+		{
+			// Arrange
+			ScriptRunner sut = new ScriptRunner(new Mock<IServiceLocator>().Object);
+			AppService appService = new AppService
+			{
+				Accounts = new List<Account>
+				{
+					new Account { ServiceName = "asdf" , Username = "asdf" }
+				}
+			};
+
+			// Act
+			sut.UpdateAppService(appService);
 		}
 
 		private void DoTest(bool topicExists, bool createIsForced, Times deleteTopicCalled, Times createTopicCalled, Times createSubCalled)
