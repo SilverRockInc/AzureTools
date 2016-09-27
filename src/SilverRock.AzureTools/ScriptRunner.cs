@@ -17,11 +17,11 @@ namespace SilverRock.AzureTools
 			_serviceLocator = serviceLocator;
 		}
 
-		public void Run(Script script, bool force = false)
+		public void Run(Script script, string environment, bool force = false)
 		{
 			if (script.DeployEnvironments != null)
 			{
-				foreach (DeployEnvironment env in script.DeployEnvironments)
+				foreach (DeployEnvironment env in script.DeployEnvironments.Where(e => e.Name == environment))
 				{
 					OnMessage($"Configuring deployment environment '{env.Name}' ... " + Environment.NewLine + Environment.NewLine);
 
